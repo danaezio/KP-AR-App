@@ -15,4 +15,9 @@ public class TopicButton : MonoBehaviour
     {
         Nucleus.instance.AddFavoriteTopic(topicIndex);
     }
+
+    public void AddTopicView()
+    {
+        Nucleus.instance.AddTopicView(topicIndex);
+    }
 }

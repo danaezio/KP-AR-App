@@ -64,6 +64,7 @@ public class UserSigning : MonoBehaviour
 
     public void SignOut()
     {
+        TimeCounter.instance.SaveTime();
         Nucleus.currentUserId = -1;
 
         EnableEntry();
@@ -84,6 +85,8 @@ public class UserSigning : MonoBehaviour
         userPhotoTitle.SetText(userName[0].ToString());
 
         EnableCabinet();
+        
+        TimeCounter.instance.SaveEntry();
     }
     
     private void EnableCabinet()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using nsDB;
 using SQLite4Unity3d;
 using UnityEngine;
@@ -109,24 +110,167 @@ public class Nucleus : MonoBehaviour
         return records[0].usr_name;
     }
 
-    public List<float> GetUsersPlayTime()
+    public bool AddVisit(DateTime entryTime, DateTime exitTime)
     {
-        return new List<float>();
+        Visit newVisit = new()
+        {
+            vis_entry_date = entryTime.ToString(),
+            vis_exit_date = exitTime.ToString(),
+            vis_usr_id = currentUserId
+        };
+
+        _db.Insert(newVisit);
+        _db.Commit();
+
+        return true;
     }
 
-    public List<int> GetUsersTopicsAverageViews()
+    public void AddTopicView(int topicIndex)
     {
-        return new List<int>();
+        List<TopicView> records = _db.Query<TopicView>("select * from topic_views where tovi_usr_id = ? and tovi_top_id = ?", currentUserId, topicIndex);
+
+        if (records.Count == 0)
+        {
+            TopicView newTopicView = new()
+            {
+                tovi_top_id = topicIndex,
+                tovi_usr_id = currentUserId,
+                tovi_view_count = 0,
+                tovi_video_view_time = 0,
+            };
+
+            newTopicView.tovi_view_count++;
+            _db.Insert(newTopicView);
+        }
+        else
+        {
+            records[0].tovi_view_count++;
+            _db.Update(records[0]);
+        }
+        
+        _db.Commit();
     }
 
-    public List<float> GetHomeworksQuality()
+    public void AddTopicVideoViewTime(int topicIndex, int seconds)
     {
-        return new List<float>();
+        List<TopicView> records = _db.Query<TopicView>("select * from topic_views where tovi_usr_id = ? and tovi_top_id = ?", currentUserId, topicIndex);
+        
+        records[0].tovi_video_view_time += seconds;
+        _db.Update(records[0]);
+        
+        _db.Commit();
     }
 
-    public List<float> GetVideoViewTime()
+    public List<UserPlayTime> GetUsersPlayTime()
     {
-        return new List<float>();  
+        List<User> users = GetUsers();
+        List<UserPlayTime> usersPlayTime = new();
+
+        foreach (User user in users)
+        {
+            List<Visit> visitsRecords = _db.Query<Visit>("select * from visits where vis_usr_id = ?", user.usr_id);
+
+            UserPlayTime userPlayTime = new ()
+            {
+                userID = user.usr_id
+            };
+
+            foreach (Visit visit in visitsRecords)
+            {
+                DateTime entryDate = DateTime.Parse(visit.vis_entry_date);
+                DateTime exitTime = DateTime.Parse(visit.vis_exit_date);
+
+                TimeSpan timeSpan = exitTime - entryDate;
+
+                userPlayTime.minutesCount += (int)timeSpan.TotalMinutes;
+            }
+
+            usersPlayTime.Add(userPlayTime);
+        }
+
+        return usersPlayTime;
+    }
+
+    public List<UserTopicViews> GetUsersTopicsAverageViews()
+    {
+        List<User> users = GetUsers();
+        List<UserTopicViews> usersTopicViews = new();
+
+        foreach (User user in users)
+        {
+            List<TopicView> topicViews = _db.Query<TopicView>("select * from topic_views where tovi_usr_id = ?", user.usr_id);
+
+            if (topicViews.Count == 0) continue;
+
+            UserTopicViews userTopicViews = new()
+            {
+                userID = user.usr_id,
+                averageViews = 0
+            };
+
+            int averageViews = topicViews.Sum(topicView => topicView.tovi_view_count);
+            averageViews /= topicViews.Count;
+
+            userTopicViews.averageViews = averageViews;
+
+            usersTopicViews.Add(userTopicViews);
+        }
+
+        return usersTopicViews;
+    }
+
+    public List<UserHomework> GetHomeworksQuality()
+    {
+        List<User> users = GetUsers();
+        List<UserHomework> usersHomework = new();
+
+        foreach (User user in users)
+        {
+            List<Homework> homeworks = _db.Query<Homework>("select * from homework where howo_usr_id = ? and howo_mark IS NOT NULL", user.usr_id);
+
+            if (homeworks.Count == 0) continue;
+
+            UserHomework userHomework = new()
+            {
+                userID = user.usr_id,
+            };
+
+            float sum = homeworks.Sum(homework => homework.howo_mark);
+            sum /= homeworks.Count;
+
+            userHomework.averageMark = sum;
+
+            usersHomework.Add(userHomework);
+        }
+
+        return usersHomework;
+    }
+
+    public List<UserTopicViews> GetVideoViewTime()
+    {
+        List<User> users = GetUsers();
+        List<UserTopicViews> usersTopicViews = new();
+
+        foreach (User user in users)
+        {
+            List<TopicView> topicViews = _db.Query<TopicView>("select * from topic_views where tovi_usr_id = ?", user.usr_id);
+
+            if (topicViews.Count == 0) continue;
+
+            UserTopicViews userTopicViews = new()
+            {
+                userID = user.usr_id,
+                averageViews = 0,
+                videoViewTime = 0,
+            };
+
+            int viewTime = topicViews.Sum(topicView => topicView.tovi_video_view_time);
+            userTopicViews.videoViewTime = viewTime;
+
+            usersTopicViews.Add(userTopicViews);
+        }
+
+        return usersTopicViews;
     }
 
     public List<int> GetHomeworksCount()
@@ -134,6 +278,13 @@ public class Nucleus : MonoBehaviour
         return new List<int>();
     }
 
+    private List<User> GetUsers()
+    {
+        List<User> records = _db.Query<User>("select * from users");
+
+        return records;
+    }
+    
     private bool CheckUser()
     {
         return currentUserId >= 0;
