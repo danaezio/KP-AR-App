@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Recomendations : MonoBehaviour
@@ -14,11 +13,16 @@ public class Recomendations : MonoBehaviour
     /// </summary>
     public void NormalizeCriteria()
     {
+        // 1 Критерий
         List<UserPlayTime> usersPlayTime = Nucleus.instance.GetUsersPlayTime();
+        // 2 Критерий
         List<UserTopicViews> usersTopicsAverageViews = Nucleus.instance.GetUsersTopicsAverageViews();
+        // 3 Критерий
         List<UserHomework> usersHomeworks = Nucleus.instance.GetHomeworksQuality();
+        // 4 Критерий
         List<UserTopicViews> usersVideoViewTime = Nucleus.instance.GetVideoViewTime();
-        //List<int> homeworksCount = Nucleus.instance.GetHomeworksCount();
+        // 5 Критерий
+        List<UserHomework> usersWithMarkedHomework = Nucleus.instance.GetHomeworksCount();
 
         foreach (UserPlayTime userPlayTime in usersPlayTime)
         {
@@ -36,7 +40,11 @@ public class Recomendations : MonoBehaviour
         {
             Debug.Log($"userID: {userVideoViewTime.userID}; topicVideoViewTime: {userVideoViewTime.videoViewTime}");
         }
-
+        foreach (UserHomework userHomework in usersWithMarkedHomework)
+        {
+            Debug.Log($"userID: {userHomework.userID}; homeworksCount: {userHomework.homeworksCount}");
+        }
+        
         for (int i = 0; i < usersPlayTime.Count; i++)
         {
             //usersPlayTime[i] = usersPlayTime[i].minutesCount / usersPlayTime.Max();

@@ -161,6 +161,10 @@ public class Nucleus : MonoBehaviour
         _db.Commit();
     }
 
+    /// <summary>
+    /// Получить время проведенное каждым пользователем в системе (1 критерий) 
+    /// </summary>
+    /// <returns></returns>
     public List<UserPlayTime> GetUsersPlayTime()
     {
         List<User> users = GetUsers();
@@ -191,6 +195,10 @@ public class Nucleus : MonoBehaviour
         return usersPlayTime;
     }
 
+    /// <summary>
+    /// Получить среднее арифметическое количества просмотров тем для каждого пользователя (2 критерий)
+    /// </summary>
+    /// <returns></returns>
     public List<UserTopicViews> GetUsersTopicsAverageViews()
     {
         List<User> users = GetUsers();
@@ -219,6 +227,10 @@ public class Nucleus : MonoBehaviour
         return usersTopicViews;
     }
 
+    /// <summary>
+    /// Получить средние арифметические всех оценок домашних работ пользователей (3 критерий)
+    /// </summary>
+    /// <returns></returns>
     public List<UserHomework> GetHomeworksQuality()
     {
         List<User> users = GetUsers();
@@ -246,6 +258,10 @@ public class Nucleus : MonoBehaviour
         return usersHomework;
     }
 
+    /// <summary>
+    /// Получить время просмотра видеороликов всех пользователей (4 критерий)
+    /// </summary>
+    /// <returns></returns>
     public List<UserTopicViews> GetVideoViewTime()
     {
         List<User> users = GetUsers();
@@ -273,11 +289,35 @@ public class Nucleus : MonoBehaviour
         return usersTopicViews;
     }
 
-    public List<int> GetHomeworksCount()
+    /// <summary>
+    /// Получить список домашних работ с проставленной оценкой (5 критерий)
+    /// </summary>
+    /// <returns></returns>
+    public List<UserHomework> GetHomeworksCount()
     {
-        return new List<int>();
+        List<User> users = GetUsers();
+        List<UserHomework> usersHomework = new();
+
+        foreach (User user in users)
+        {
+            List<Homework> homeworks = _db.Query<Homework>("select * from homework where howo_usr_id = ? and howo_mark IS NOT NULL", user.usr_id);
+            
+            UserHomework userHomework = new()
+            {
+                userID = user.usr_id,
+                homeworksCount = homeworks.Count
+            };
+            
+            usersHomework.Add(userHomework);
+        }
+
+        return usersHomework;
     }
 
+    /// <summary>
+    /// Получить список всех пользователей
+    /// </summary>
+    /// <returns>Список всех пользователей</returns>
     private List<User> GetUsers()
     {
         List<User> records = _db.Query<User>("select * from users");
@@ -285,6 +325,10 @@ public class Nucleus : MonoBehaviour
         return records;
     }
     
+    /// <summary>
+    /// Проверить что сейчас авторизован какой-либо пользователь
+    /// </summary>
+    /// <returns>True если пользователь авторизован</returns>
     private bool CheckUser()
     {
         return currentUserId >= 0;
