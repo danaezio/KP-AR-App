@@ -23,7 +23,7 @@ public class Recomendations : MonoBehaviour
         List<UserTopicViews> usersVideoViewTime = Nucleus.instance.GetVideoViewTime();
         // 5 Критерий
         List<UserHomework> usersWithMarkedHomework = Nucleus.instance.GetHomeworksCount();
-
+        
         foreach (UserPlayTime userPlayTime in usersPlayTime)
         {
             Debug.Log($"userID: {userPlayTime.userID}; PlayTimeMinutes: {userPlayTime.minutesCount}");
