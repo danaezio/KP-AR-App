@@ -1,5 +1,5 @@
-public struct UserPlayTime
+public class UserPlayTime
 {
-    public int minutesCount;
+    public float minutesCount;
     public int userID;
 }

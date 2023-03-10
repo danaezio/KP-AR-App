@@ -20,4 +20,10 @@ public class TopicButton : MonoBehaviour
     {
         Nucleus.instance.AddTopicView(topicIndex);
     }
+
+    public void DeleteFromFavorite()
+    {
+        Nucleus.instance.DeleteFavoriteTopic(topicIndex);
+        Destroy(gameObject);
+    }
 }

@@ -1,6 +1,6 @@
-public struct UserTopicViews
+public class UserTopicViews
 {
         public int userID;
-        public int averageViews;
-        public int videoViewTime;
+        public float averageViews;
+        public float videoViewTime;
 }

@@ -1,10 +1,13 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class UserSigning : MonoBehaviour
 {
+    public static UnityAction onSigning;
+    
     [Header("Registration")]
     [SerializeField] private TMP_InputField registrationNameField;
     [SerializeField] private TMP_InputField registrationPasswordField;
@@ -18,7 +21,7 @@ public class UserSigning : MonoBehaviour
     [SerializeField] private GameObject entryMenu;
     [SerializeField] private GameObject registrationMenu;
     [SerializeField] private GameObject cabinetMenu;
-    [SerializeField] private TextMeshProUGUI userNameTitle;
+    [SerializeField] private TMP_InputField userNameTitle;
     [SerializeField] private TextMeshProUGUI userPhotoTitle;
 
     [Header("Animators")]
@@ -81,11 +84,12 @@ public class UserSigning : MonoBehaviour
 
         string userName = _nucleus.GetUserName();
         
-        userNameTitle.SetText(userName);
+        userNameTitle.text = userName;
         userPhotoTitle.SetText(userName[0].ToString());
 
         EnableCabinet();
-        
+        onSigning?.Invoke();
+
         TimeCounter.instance.SaveEntry();
     }
     

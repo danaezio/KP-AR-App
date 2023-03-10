@@ -70,6 +70,16 @@ public class Nucleus : MonoBehaviour
         return true;
     }
 
+    public void UpdateUser(string userName)
+    {
+        User user = GetUser(currentUserId);
+
+        user.usr_name = userName;
+
+        _db.Update(user);
+        _db.Commit();
+    }
+
     /// <summary>
     /// Получить избранные темы пользователя
     /// </summary>
@@ -97,6 +107,25 @@ public class Nucleus : MonoBehaviour
         _db.Commit();
 
         return true;
+    }
+
+    public bool DeleteFavoriteTopic(int topicId)
+    {
+        try
+        {
+            List<FavoriteTopic> records =
+                _db.Query<FavoriteTopic>("select * from favorite_topics where fato_usr_id = ?", Nucleus.currentUserId);
+
+            _db.Delete(records[topicId]);
+            _db.Commit();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+            
+            return false;
+        }
     }
 
     /// <summary>
@@ -318,11 +347,18 @@ public class Nucleus : MonoBehaviour
     /// Получить список всех пользователей
     /// </summary>
     /// <returns>Список всех пользователей</returns>
-    private List<User> GetUsers()
+    public List<User> GetUsers()
     {
         List<User> records = _db.Query<User>("select * from users");
 
         return records;
+    }
+
+    public User GetUser(int userID)
+    {
+        List<User> records = _db.Query<User>("select * from users");
+
+        return records.Single(e => e.usr_id == userID);
     }
     
     /// <summary>
