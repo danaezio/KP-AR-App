@@ -4,7 +4,8 @@ using UnityEngine;
 public class TopicButton : MonoBehaviour
 {
     public int topicIndex;
-    public TextMeshProUGUI title;
+    [SerializeField] private TextMeshProUGUI titleText;
+    [SerializeField] private TextMeshProUGUI descriptionText;
 
     public void LoadTopic()
     {
@@ -25,5 +26,11 @@ public class TopicButton : MonoBehaviour
     {
         Nucleus.instance.DeleteFavoriteTopic(topicIndex);
         Destroy(gameObject);
+    }
+
+    public void SetText(string title, string description)
+    {
+        titleText.text = title;
+        descriptionText.text = description;
     }
 }

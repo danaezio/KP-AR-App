@@ -20,6 +20,7 @@ public class UserSigning : MonoBehaviour
     [Header("UI")] 
     [SerializeField] private GameObject entryMenu;
     [SerializeField] private GameObject registrationMenu;
+    [SerializeField] private GameObject authorizationMenu;
     [SerializeField] private GameObject cabinetMenu;
     [SerializeField] private TMP_InputField userNameTitle;
     [SerializeField] private TextMeshProUGUI userPhotoTitle;
@@ -41,6 +42,8 @@ public class UserSigning : MonoBehaviour
     {
         if (_nucleus.AuthorizeUser(authorizeEmailField.text, authorizePasswordField.text))
         {
+            authorizationMenu.SetActive(false);
+            
             SignIn();
         }
         else
@@ -85,7 +88,7 @@ public class UserSigning : MonoBehaviour
         string userName = _nucleus.GetUserName();
         
         userNameTitle.text = userName;
-        userPhotoTitle.SetText(userName[0].ToString());
+        if(userPhotoTitle != null) userPhotoTitle.SetText(userName[0].ToString());
 
         EnableCabinet();
         onSigning?.Invoke();

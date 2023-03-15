@@ -48,8 +48,32 @@ public class TopicLoader : MonoBehaviour
         {
             GameObject newTopicButton = Instantiate(Resources.Load<GameObject>("Topic Button"), favoriteTopicsLayout);
 
-            newTopicButton.GetComponentInChildren<TextMeshProUGUI>().SetText(_topics[i].top_name);
-            newTopicButton.GetComponent<TopicButton>().topicIndex = i;
+            TopicButton topicButton = newTopicButton.GetComponent<TopicButton>();
+            
+            topicButton.topicIndex = i;
+
+            switch (_topics[i].top_name)
+            {
+                case "UV-Развертка":
+                    topicButton.SetText(_topics[i].top_name,
+                        "Создавайте качественную развертку - для качественных текстур!");
+                    break;
+                case "Hard Surface":
+                    topicButton.SetText(_topics[i].top_name,
+                        "Твердотельное моделлирование - создание различных объектов с ярко выраженными углами.");
+                    break;
+                case "Substance Painter":
+                    topicButton.SetText(_topics[i].top_name,
+                        "Научитесь текстурировать свои модели по всем канонам геймдева!");
+                    break;
+                case "Soft Surface":
+                    topicButton.SetText(_topics[i].top_name,
+                        "Мягкотельное моделлирование - создание объектов с арганичной и плавной формой.");
+                    break;
+                default:
+                    topicButton.SetText(_topics[i].top_name, string.Empty);
+                    break;
+            }
         }
     }
 

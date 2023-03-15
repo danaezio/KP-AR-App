@@ -9,6 +9,7 @@ public class Rating : MonoBehaviour
 {
     [SerializeField] private Transform content;
     [SerializeField] private GameObject userPanelPrefab;
+    [SerializeField] private List<Color> placeColors;
 
     public List<AdditiveCriterion> additiveCriteria;
 
@@ -29,12 +30,18 @@ public class Rating : MonoBehaviour
         {
             UserPanel newUserPanel = Instantiate(userPanelPrefab.gameObject, content).GetComponent<UserPanel>();
 
-            newUserPanel.SetUI(users.Single(e => e.usr_id == additiveCriteria[i].userId).usr_name + 1, i);
+            newUserPanel.SetUI(users.Single(e => e.usr_id == additiveCriteria[i].userId).usr_name, i + 1);
+
+            if (placeColors.Count > i)
+            {
+                newUserPanel.SetColor(placeColors[i]);
+            }
         }
     }
 
     private void GetAdditiveCriteria(IEnumerable<AdditiveCriterion> additiveCriterion)
     {
         additiveCriteria = additiveCriterion.ToList();
+        ViewRating();
     }
 }

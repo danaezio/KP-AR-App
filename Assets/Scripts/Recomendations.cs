@@ -5,19 +5,20 @@ using System.Linq;
 using nsDB;
 using TMPro;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class Recomendations : MonoBehaviour
 {
     public static UnityAction<IEnumerable<AdditiveCriterion>> onGetAdditiveCriteria;
 
     [SerializeField] private List<RecommendationField> recommendationFields;
-    [SerializeField] private TextMeshProUGUI recommendationText;
+    [SerializeField] private Transform content;
 
+    private GameObject recommendationObject;
+    
     private void Start()
     {
         UserSigning.onSigning += NormalizeCriteria;
-
-        recommendationFields = recommendationFields.OrderBy(field => field.threshold).ToList();
     }
 
     /// <summary>
@@ -97,21 +98,27 @@ public class Recomendations : MonoBehaviour
 
         List<User> users = Nucleus.instance.GetUsers();
         List<AdditiveCriterion> additiveCriteria = new List<AdditiveCriterion>();
+        AdditiveCriterion currentUserCriteria = null;
 
         for (int i = 0; i < users.Count; i++)
         {
             AdditiveCriterion additiveCriterion = new AdditiveCriterion();
             
+            additiveCriterion.userId = users[i].usr_id;
+            
             try
             {
-                additiveCriterion.userId = users[i].usr_id;
-
                 additiveCriterion.additiveCriteria =
                     usersWithMarkedHomework.Single(e => e.userID == users[i].usr_id).homeworksCount +
                     usersVideoViewTime.Single(e => e.userID == users[i].usr_id).videoViewTime +
                     usersHomeworks.Single(e => e.userID == users[i].usr_id).averageMark +
                     usersTopicsAverageViews.Single(e => e.userID == users[i].usr_id).averageViews +
                     usersPlayTime.Single(e => e.userID == users[i].usr_id).minutesCount;
+
+                if (additiveCriterion.userId == Nucleus.currentUserId)
+                {
+                    currentUserCriteria = additiveCriterion;
+                }
             }
             catch (Exception e)
             {
@@ -130,29 +137,33 @@ public class Recomendations : MonoBehaviour
             AdditiveCriterion item = additiveCriteria[index];
             item.additiveCriteria /= sum;
         }
-
+        
         onGetAdditiveCriteria?.Invoke(additiveCriteria);
-        if (Nucleus.currentUserId > 0 && Nucleus.currentUserId < additiveCriteria.Count)
+        if (currentUserCriteria != null)
         {
-            SetRecommendation(additiveCriteria[Nucleus.currentUserId].additiveCriteria);   
+            SetRecommendation(currentUserCriteria.additiveCriteria);   
         }
     }
 
     private void SetRecommendation(float additiveCriteria)
     {
+        Debug.Log(additiveCriteria);
+        if(additiveCriteria >= 0.5f) return;
+        Destroy(recommendationObject);
+        
         for (int i = recommendationFields.Count - 1; i >= 0; i--)
         {
-            if (recommendationFields[i].threshold <= additiveCriteria)
-            {
-                recommendationText.text = recommendationFields[i].recommendationText;
-            }
+            if (!(recommendationFields[i].threshold <= additiveCriteria)) continue;
+            
+            recommendationObject = Instantiate(recommendationFields[i].prefab, content);
+            break;
         }
     }
 
     [System.Serializable]
     struct RecommendationField
     {
-        public string recommendationText;
+        public GameObject prefab;
         public float threshold;
     }
 }
